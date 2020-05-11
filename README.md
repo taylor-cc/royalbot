@@ -128,6 +128,3 @@ const chlist = {
 > forever stopall
 - 要關掉時可以用這個
 
-### - 開發者群組(其實只有一個人)
-如果有問題或想討論的, 可以到此群組
-https://discord.gg/mjmtcc2
