@@ -200,7 +200,7 @@ module.exports = {
         });
     },
 
-    getBKCollectingtable: function (SSID) {
+    getBKCollectingtable: function (SSID,list) {
         return new Promise(function (resolve, reject) {
             fs.readFile('credentials.json', async (err, content) => {
                 if (err) {
@@ -210,7 +210,7 @@ module.exports = {
                 }
                 try {
                     var oauth = await getauth(JSON.parse(content));
-                    var data = await toget(oauth, SSID, '集刀' + '!A33:E64', 'ROWS');
+                    var data = await toget(oauth, SSID, list + '!A33:E64', 'ROWS');
                     resolve(data);
                 }
                 catch (err) {
