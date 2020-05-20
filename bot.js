@@ -8,7 +8,7 @@ const token = auth.token;
 const column = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
     'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH']
-var objlist = { "0": "集刀","集": "集刀","1": "一王", "2": "二王", "3": "三王", "4": "四王", "5": "五王", "一": "一王", "二": "二王", "三": "三王", "四": "四王", "五": "五王" }
+var objlist = { "1": "一王", "2": "二王", "3": "三王", "4": "四王", "5": "五王", "一": "一王", "二": "二王", "三": "三王", "四": "四王", "五": "五王","0": "集刀","集": "集刀" }
 
 
 // google sheet id
@@ -20,6 +20,8 @@ const chlist = {
     '708899960309153855': ssidlist[0],
     '700695816645378078': ssidlist[0],
     '646169028502749204': ssidlist[0],
+  
+    
     //在這兩個頻道中填表, 都會連結到上面的第一個表單
     //'新頻道ID': ssidlist[1],
 
@@ -136,6 +138,7 @@ client.on('message', async message => {
                 })
                 return;
             }
+
             else if (command === 'fillfor' || command === '代填' || command === '幫填') {
                 queue.push(async () => {
                     try {
@@ -297,135 +300,6 @@ client.on('message', async message => {
                 }
                 return;
             }
-
-            else if (command === '分組' || command === '分組說明' || command === 'gp') {
-                try {
-                    var table = await gapi.getGroup(chlist[message.channel.id]);
-                    var msg = '今日分組說明:\n'
-                    for (var i = 1; i < table.length; i++) {
-                        if (table[i][0] != '') {
-                            if (typeof table[i][4] != "undefined") {
-                                msg += String.format('- {0}   目標 {1}   還有 **{3}**/{4} 個名額   說明: {2}\n', table[i][0], table[i][2], table[i][4], table[i][1] - table[i][3], table[i][1])
-                            }
-                            else {
-                                msg += String.format('- {0}   目標 {1}   還有 **{3}**/{4} 個名額\n', table[i][0], table[i][2], table[i][4], table[i][1] - table[i][3], table[i][1])
-                            }
-                        }
-                        else break;
-                    }
-                    msg += '可使用 <!選組 組別名稱> 或 <!報名 組別名稱> 來報名組別 ex: !報名 ' + table[1][0]
-                    message.channel.send(msg);
-                }
-                catch (err) {
-                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                    console.log(err)
-                    message.reply('錯誤訊息: ' + err.message);
-                }
-                return;
-            }
-
-            else if (command === '報名' || command === '選組') {
-                try {
-                    var newGroup
-                    var memberid
-                    if (args.length == 1) {
-                        newGroup = args[0];
-                        memberid = message.author.id;
-                    }
-                    else if (args.length == 2) {
-                        memberid = args[0].replace(/[^0-9\.]+/g, '');
-                        if (!(memberid in userlist)) {
-                            throw new Error('錯誤的成員名稱!');
-                        }
-                        newGroup = args[1];
-                    }
-                    else {
-                        message.reply('指令輸入錯誤! 請使用 <!選組 組別名稱> 進行報名 ex: !選組 A');
-                        return;
-                    }
-
-                    var table = await gapi.getGroup(chlist[message.channel.id]);
-                    var grouplist = {}
-                    for (var i = 1; i < table.length; i++) {
-                        if (table[i][0] != '') {
-                            grouplist[table[i][0]] = table[i][1] - table[i][3]
-                        }
-                        else break;
-                    }
-
-                    if (!(newGroup in grouplist)) {
-                        message.reply('組別輸入錯誤! 請使用 <!分組> 取得今日分組說明')
-                        return;
-                    }
-                    if (grouplist[newGroup] <= 0) {
-                        message.reply('組別人數已滿! 請使用 <!查組> 取得詳細分組名單')
-                        return;
-                    }
-
-                    var Dtable = await gapi.getDemageTable(chlist[message.channel.id]);
-                    var row = 0;
-                    for (var i = 0; i < Dtable.length; i++) {
-                        if (Dtable[i][0] == userlist[memberid][0]) row = i
-                    }
-                    if (row == 0) {
-                        throw new Error('查無此人')
-                    }
-                    var oriGroup = Dtable[row][19]
-                    result = await gapi.fillin(column[19] + (row + 1), [[newGroup]], chlist[message.channel.id], '');
-
-                    if (oriGroup == '' || typeof oriGroup === 'undefined') message.reply(String.format('{1} 已分到 {0}', newGroup, Dtable[row][0]))
-                    else message.reply(String.format('{2} 已由 {1} 改為 {0}', newGroup, oriGroup, Dtable[row][0]))
-
-                }
-                catch (err) {
-                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                    console.log(err)
-                    message.reply('錯誤訊息: ' + err.message);
-                }
-                return;
-            }
-
-            else if (command === '查組' || command === '分組名單') {
-                try {
-                    var table = await gapi.getGroup(chlist[message.channel.id]);
-                    var grouplist = {}
-                    for (var i = 1; i < table.length; i++) {
-                        if (table[i][0] != '') {
-                            grouplist[table[i][0]] = [String.format('{0}/{1}', table[i][3], table[i][1]), '']
-                        }
-                        else break;
-                    }
-
-                    var Dtable = await gapi.getDemageTable(chlist[message.channel.id]);
-                    var unselected = ''
-                    for (var i = 2; i < Dtable.length - 1; i++) {
-                        if (Dtable[i][19] == '' || typeof Dtable[i][19] === 'undefined') {
-                            unselected += Dtable[i][0] + ', '
-                        }
-                        else {
-                            // console.log(Dtable[i][19])
-                            if (Dtable[i][19] in grouplist)
-                                grouplist[Dtable[i][19]][1] += Dtable[i][0] + ', '
-                            else
-                                unselected += Dtable[i][0] + ', '
-                        }
-                    }
-
-                    msg = '各組別 已報人數/總人數 與 報名人員如下:\n'
-                    for (var i = 1; i < table.length; i++) {
-                        msg += String.format('- {0} ({1}) : {2}\n\n', table[i][0], grouplist[table[i][0]][0], grouplist[table[i][0]][1].substring(0, grouplist[table[i][0]][1].length - 2)) //substring去逗號
-                    }
-                    msg += '未選組 : ' + unselected.substring(0, unselected.length - 2)
-
-                    message.channel.send(msg)
-                }
-                catch (err) {
-                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                    console.log(err)
-                    message.reply('錯誤訊息: ' + err.message);
-                }
-                return;
-            }
 	
 
 	    else if (command === 'all' || command === '總表') {
@@ -536,287 +410,8 @@ client.on('message', async message => {
                 message.channel.send(remsg);
                 return;
             }	
-   
-
-	else if (command === '報一'|| command === 'add1' ) {
-                queue.push(async () => {
- 			var str = ''; //組合回報訊息(args)
-                         var list= '一王';
-			if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
- 		     else {
-                        message.reply('請回覆指定王&組合/傷害').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
-                    try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        if (ctable[1].indexOf(memberName) != -1) {
-			    memberName = userlist[message.author.id][0];
-                            row = ctable[1].indexOf(memberName);
-			    content = [[str]];
-                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
-                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
-			content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
-                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
-        else if (command === '報二' || command === 'add2') {
-                queue.push(async () => {
- 			var str = ''; //組合回報訊息(args)
-                         var list= '二王';
-			if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
- 		     else {
-                        message.reply('請回覆指定王&組合/傷害').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
-                    try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        if (ctable[1].indexOf(memberName) != -1) {
-			    memberName = userlist[message.author.id][0];
-                            row = ctable[1].indexOf(memberName);
-			    content = [[str]];
-                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
-                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
-			content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
-                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
-
-	else if (command === '報三'|| command === 'add3' ) {
-                queue.push(async () => {
- 			var str = ''; //組合回報訊息(args)
-                         var list= '三王';
-			if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
- 		     else {
-                        message.reply('請回覆指定王&組合/傷害').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
-                    try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        if (ctable[1].indexOf(memberName) != -1) {
-			              memberName = userlist[message.author.id][0];
-                            row = ctable[1].indexOf(memberName);
-			                 content = [[str]];
-                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
-                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
-			            content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
-                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
-
-	else if (command === '報四' || command === 'add4') {
-                queue.push(async () => {
- 			var str = ''; //組合回報訊息(args)
-                         var list= '四王';
-			if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
- 		     else {
-                        message.reply('請回覆指定王&組合/傷害').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
-                    try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                       if (ctable[1].indexOf(memberName) != -1) {
-			    memberName = userlist[message.author.id][0];
-                            row = ctable[1].indexOf(memberName);
-			    content = [[str]];
-                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
-                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
-			content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
-                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }	
-
-	else if (command === '報五' || command === 'add5') {
-                queue.push(async () => {
- 			var str = ''; //組合回報訊息(args)
-                         var list= '五王';
-			if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
- 		     else {
-                        message.reply('請回覆組合/傷害/狀態').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
-                    try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        if (ctable[1].indexOf(memberName) != -1) {
-			    memberName = userlist[message.author.id][0];
-                            row = ctable[1].indexOf(memberName);
-			    content = [[str]];
-                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
-                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
-			content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
-                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
-
-
-            else if (command === 'call'||command === '叫') {
-                queue.push(async () => {
-                        
-                   
-			 
-                    try {
-                        if (args.length != 1) {
-                            message.channel.send('請輸入要呼叫的王 ex: !call 5');
-                            return;  
-                           }   
-                           var  list  = objlist[args[0].substring(0,1)]
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                            ctable = tables[0];
-                            var msg='要打'+list+'的出刀囉~~';
-                            rowl = ctable[0].length;
-                            for (var i = 2; i < rowl; i++) {
-                                code=usercode[ctable[1][i]][0]; 
-                              msg += String.format('<@!{0}>', code);
-                            }
-                            
-                            message.channel.send(msg);
-                            return;
-                        
-                      				
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
-
-
-
             
-            else if (command === 'add') {
+            else if (command === 'add'|| command === '報') {
                 queue.push(async () => {
              var str = ''; //組合回報訊息(args)
             
@@ -865,16 +460,97 @@ client.on('message', async message => {
                 return;
             }
 
+            else if (command === 'addfor'|| command === '代報') {
+                queue.push(async () => {
+             var str = ''; //組合回報訊息(args)
             
-            
+                       list  = objlist[args[1].substring(0,1)]
+
+                       var memberid = args[0].replace(/[^0-9\.]+/g, '');
+                        if (!(memberid in userlist)) {
+                            throw new Error('錯誤的成員名稱!');
+                            return;
+                        }
+                               
+			 if (args.length >= 3) {
+                        for (var i = 2; i < args.length; i++) {
+                            str += args[i] + ' ';
+                        }
+                    }
+ 		     else {
+                        message.reply('請回覆依照格式回覆 ex: !addfor @成員 5 [訊息]').then(d_msg => { d_msg.delete(5000) });
+                        return;
+                    }
+
+                    try {
+                        var tables = await gapi.getotable(chlist[message.channel.id],list);
+                        memberName = userlist[memberid][0];
+                        ctable = tables[0];
+                        if (ctable[1].indexOf(memberName) != -1) {
+			                row = ctable[1].indexOf(memberName);
+			                content = [[str]];
+                            result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
+                            message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
+                            return;
+                        }
+                        //取閃退狀態
+                        dtable = tables[1];
+                        row = ctable[0].length - 1; //插入位置
+                        crashed = await getcrash(dtable, memberName);
+                        content = [[row, memberName, crashed ? 'v' : '']]
+                        //TODO: 取剩餘刀數
+                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
+			            content = [[str]];
+                        result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
+                        message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
+				
+                    }
+                    catch (err) {
+                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                        console.log(err)
+                        message.reply('錯誤訊息: ' + err.message);
+                    }
+                    return 0;
+                })
+                return;
+            }
+
+            else if (command === 'call'||command === '叫') {
+                queue.push(async () => {
+                    try {
+                        if (args.length != 1) {
+                            message.channel.send('請輸入要呼叫的王 ex: !call 5');
+                            return;  
+                           }   
+                           var  list  = objlist[args[0].substring(0,1)]
+                        var tables = await gapi.getotable(chlist[message.channel.id],list);
+                            ctable = tables[0];
+                            var msg='要打'+list+'的出刀囉~~';
+                            rowl = ctable[0].length;
+                            for (var i = 2; i < rowl; i++) {
+                                code=usercode[ctable[1][i]][0]; 
+                              msg += String.format('<@!{0}>', code);
+                            }
+                            
+                            message.channel.send(msg);
+                            return;
+                    }
+                    catch (err) {
+                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                        console.log(err)
+                        message.reply('錯誤訊息: ' + err.message);
+                    }
+                    return 0;
+                })
+                return;
+            }
 
 
             else if (command === 'del' || command === '收回' ) {
                 queue.push(async () => {
-
                     try {
                         if (args.length != 1) {
-                            message.channel.send('請輸入要收回的王 ex: !delte 5');
+                            message.channel.send('請輸入要收回的王 ex: !del 5');
                             return;
                         }
 
@@ -930,7 +606,7 @@ client.on('message', async message => {
 
 
                         if (args.length != 2) {
-                            message.channel.send('請輸入要收回的王 ex: !delte @成員 5');
+                            message.channel.send('請輸入要收回的王 ex: !delfor @成員 5');
                             return;
                         }
 
@@ -986,10 +662,8 @@ client.on('message', async message => {
                             message.channel.send('請輸入要清除的列表 ex: !清除 一王');
                             return;
                         }
-             //get args
-            
+                        //get args
                         var target = objlist[args[0].substring(0,1)]
-                       
                         //backup
                         var oldctable = await gapi.getotablebyRow(chlist[message.channel.id],target);
                         var bk_table = [...Array(30)].map(x => Array(4).fill(''))
@@ -998,9 +672,6 @@ client.on('message', async message => {
                                 bk_table[i][j] = oldctable[i][j]
                         }
                         backupresult = await gapi.fillin('A33:E62', bk_table, chlist[message.channel.id], target);
-
-                      
-                       
                         //write
                         let firstrow = ['', '', '目標', target]
                         let secondrow = ['順序', '成員名稱', '今日已閃', '進場', '回報訊息(傷害)']
@@ -1009,7 +680,6 @@ client.on('message', async message => {
                         let result = await gapi.fillin('A1:E31', matrix, chlist[message.channel.id], target);
                         message.channel.send('班表已重置 ').then(d_msg => { d_msg.delete(5000) });
                         // message.channel.send(`<@&${tag}> ${target}`)
-
                     }
 
 		catch (err) {
@@ -1049,221 +719,14 @@ client.on('message', async message => {
                 })
                 return;
             }
-            /************* */
-            else if (command === '報刀說明') {
-
-                var embed = {
-                    "title": "報刀功能說明",
-                    "description": "本功能與傷害紀錄表中的分頁連動，若有換人需求可至排刀表手動修改\n本功能也可用於出刀報數，方便統計報名者，並隨時查看名單", /******************* */
-                    "color": 1500903,
-                    "fields": [
-			            {
-                            "name": "<!add 1 [回報訊息(傷害)]>",
-                            "value": "報名一王並登記傷害，add 2~add 5 2~5王指令  EX:!add 1 500W\n重複指令可覆蓋訊息"
-                        },
-                        {
-                            "name": "<!進 1> 或 <!go 1>",
-                            "value": "登記進場 1王"
-                        },
-
-                        {
-                            "name": "<!退 1> 或 <!back 1>",
-                            "value": "取消登記進場 1王"
-                        },
-			            {
-                            "name": "<!all> 或 <!總表>",
-                            "value": "查看各王報名狀況(預設前9位)"
-                        },
-                                                
-			            {
-                            "name": "<!1> 或<!one> 或 <!一王>",
-                            "value": "查看一王報名人員清單和回報傷害，二王指令 !二王/two"
-                        },
-                        {
-                            "name": "<!call 1> 或 <!叫 1>",
-                            "value": "呼叫報名一王的成員"
-                        },
-                        {
-                            "name": "<!del 1> 或 <!收回 1>",
-                            "value": "刪除/收回 1王的報名列表"
-                        },
-                        {
-                            "name": "<!delfor @成員 1> 或 <!代刪 @成員 1>",
-                            "value": "幫 @成員 刪除/收回 1王的報名列表"
-                        },
-                        {
-                            "name": "<!清除 1> 或<!clear 1>",
-                            "value": "重置指定班表 "
-                        },
-                        {
-                            "name": "<!回復 1> 或<!recover 1>",
-                            "value": "回復上次重整前備份名單"
-                        },
-
-                        
-                                                                   ]
-                };
-                message.channel.send({ embed });
-                return;
-            }
- /************* */
- else if (command === '集刀說明') {
-
-    var embed = {
-        "title": "集刀功能說明",
-        "description": "本功能與傷害紀錄表中的集刀分頁連動，若有換人需求可至排刀表手動修改", /******************* */
-        "color": 1500903,
-        "fields": [
-            {
-                "name": "<!集刀 五王>",
-                "value": "清空集刀表，開始新的集刀"
-            },
-            {
-                "name": "<!刀表> 或 <!集刀表>",
-                "value": "查看目前集刀報名人員清單、進場狀態，和回報傷害"
-            },
-            {
-                "name": "<!回復> 或 <!recover>",
-                "value": "若誤清集刀表，可用此指令回復上一個集刀名單"
-            },
-            {
-                "name": "<!報數>",
-                "value": "會將呼叫者排進集刀列表中，順序以呼叫指令的先後為主"
-            },
-            {
-                "name": "<!進場 0 >",
-                "value": "登記進場"
-            },
-            {
-                "name": "<!回報 [回報訊息]>",
-                "value": "例如\"7秒139 女帝未開\"，再次呼叫此指令可以更新訊息"
-            },
-        ]
-    };
-     
-    message.channel.send({ embed });
-    return;
-}
-            else if (command === '集刀表' || command === '刀表') {
-                var tables = await gapi.getCollectingtable(chlist[message.channel.id]);
-                var ctable = tables[0];
-                var dtable = tables[1]; //為了拿剩餘刀數 才讀傷害表
-                var remsg = `開始時間 ${ctable[1][0]}  目標 ${ctable[3][0]}\n`
-                for (i = 2; i < ctable[0].length; i++) {
-                    remsg += String.format('{0}  {1}', ctable[0][i], ctable[1][i])
-                    remsg += ' ' + await getleftknife(dtable, ctable[1][i])
-                    remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 回報: ' + ctable[4][i]
-                    remsg += '\n'
-                }
-                message.channel.send(remsg);
-                return;
-            }
-
-            else if (command === '集刀' || command === '集刀開始' || command === 'start') {
-                queue.push(async () => {
-
-                    try {
-                        if (args.length != 1) {
-                            message.channel.send('請輸入要集刀的王 ex: !集刀 5王');
-                            return;
-                        }
-
-                        //backup
-                        var oldctable = await gapi.getCollectingtablebyRow(chlist[message.channel.id]);
-                        var bk_table = [...Array(30)].map(x => Array(5).fill(''))
-                        for (i = 0; i < oldctable.length; i++) {
-                            for (j = 0; j < oldctable[i].length; j++)
-                                bk_table[i][j] = oldctable[i][j]
-                        }
-                        backupresult = await gapi.fillin('A33:E62', bk_table, chlist[message.channel.id], '集刀');
-
-                        //get args
-                        var target = args[0];
-                        if (target.substr(target.length - 1) != '王') target += '王'
-                        var dt = new Date();
-                        var starttime = `${dt.getHours()}:${dt.getMinutes()}`;
-                        //get which group to tag
-                        // let tag = grouptaglist[message.channel.id]
-
-                        //write
-                        let firstrow = ['時間', starttime, '目標', target]
-                        let secondrow = ['順序', '成員名稱', '今日已閃', '進場', '回報訊息']
-                        let matrix = [...Array(29)].map(x => Array(5).fill(''))
-                        matrix = [firstrow, secondrow, ...matrix]
-                        let result = await gapi.fillin('A1:E31', matrix, chlist[message.channel.id], '集刀');
-                        message.channel.send('集刀表已重置 請使用<!報數> 進行報數\n若誤清可使用 <!回復> 或 <!recover> 回復上一個刀表').then(d_msg => { d_msg.delete(5000) });
-                        // message.channel.send(`<@&${tag}> ${target}`)
-
-                    }
-                    catch (err) {
-                        console.log(err)
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                })
-                return;
-            }
-           
-          /*  else if (command === '回復' || command === 'recover') {
-                //recover
-                queue.push(async () => {
-
-                    try {
-                        //get bk table
-                        var oldctable = await gapi.getBKCollectingtable(chlist[message.channel.id]);
-                        var bk_table = [...Array(31)].map(x => Array(5).fill(''))
-                        for (i = 0; i < oldctable.length; i++) {
-                            for (j = 0; j < oldctable[i].length; j++)
-                                bk_table[i][j] = oldctable[i][j]
-                        }
-                        result = await gapi.fillin('A1:E31', bk_table, chlist[message.channel.id], '集刀');
-                        message.channel.send('集刀表已回復')
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                })
-                return;
-            } */
-
-            else if (command === '報數' || command === '報') {
-                queue.push(async () => {
-                    try {
-                        var tables = await gapi.getCollectingtable(chlist[message.channel.id]);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        if (ctable[1].indexOf(memberName) != -1) {
-                            message.reply('已在集刀表中').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        //取閃退狀態
-                        dtable = tables[1];
-                        row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
-                        //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], '集刀');
-                        message.reply('報數成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                    return 0;
-                })
-                return;
-            }
+            
+          
+         
             else if (command === '進場' || command === '進'|| command === 'go') {
                 queue.push(async () => {
                     try {
                         if (args.length != 1) {
-                            message.channel.send('請輸入要進場的王 ex: !進 1 || 集刀請打 !進 0 ');
+                            message.channel.send('請輸入要進場的王 ex: !進 1 ');
                             return;
                         }
                         list  = objlist[args[0].substring(0,1)]
@@ -1341,66 +804,73 @@ client.on('message', async message => {
             }
 
 
+else if (command === '報刀說明') {
 
+    var embed = {
+        "title": "報刀功能說明",
+        "description": "本功能與傷害紀錄表中的分頁連動，若有換人需求可至排刀表手動修改\n本功能也可用於出刀報數，方便統計報名者，並隨時查看名單", /******************* */
+        "color": 1500903,
+        "fields": [
+            {
+                "name": "<!add 1 [回報訊息(傷害)]>或<!報 1 [回報訊息(傷害)]>",
+                "value": "報名一王並登記傷害，add 2~add 5 2~5王指令  EX:!add 1 500W\n重複指令可覆蓋訊息"
+            },
+            {
+                "name": "<!addfor @成員 1 [回報訊息(傷害)]>或<!代報  @成員1 [回報訊息(傷害)]>",
+                "value": "代替@成員報名一王並登記傷害，add 2~add 5 2~5王指令  EX:!add 1 500W\n重複指令可覆蓋訊息"
+            },
+            {
+                "name": "<!進 1> 或 <!go 1>",
+                "value": "登記進場 1王"
+            },
 
-            else if (command === '回報') {
-                queue.push(async () => {
-                    var str = ''; //組合回報訊息(args)
-                    if (args.length >= 1) {
-                        for (var i = 0; i < args.length; i++) {
-                            str += args[i] + ' ';
-                        }
-                    }
-                    else {
-                        message.reply('請回報傷害').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-                    try {
-                        var tables = await gapi.getCollectingtable(chlist[message.channel.id]);
-                        memberName = userlist[message.author.id][0];
-                        ctable = tables[0];
-                        row = ctable[1].indexOf(memberName)
-                        if (row < 0) {
-                            message.reply('不在集刀表中。').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        var doublecall = false; //檢查是否重複呼叫
-                        if (typeof (ctable[4][row]) != 'undefined') {
-                            // console.log(typeof(ctable[4][row]))
-                            doublecall = true;
-                        }
-                        var mancount = ctable[0].length - 2; //集刀表人員總數 因會算到tittle 所以-1
-                        var reportcount = -1; //已回報人數
-                        ctable[4].forEach(function (x) { if (x != '') reportcount += 1 });
-                        // console.log(reportcount)
-                        count = mancount - reportcount; //未回報人數
+            {
+                "name": "<!退 1> 或 <!back 1>",
+                "value": "王死退刀，取消進場狀態 "
+            },
+            {
+                "name": "<!all> 或 <!總表>",
+                "value": "查看各王報名狀況(預設前9位)"
+            },
+                                    
+            {
+                "name": "<!1> 或<!one> 或 <!一王>",
+                "value": "查看一王報名人員清單和回報傷害，二王指令 !二王/two/2"
+            },
+            {
+                "name": "<!call 1> 或 <!叫 1>",
+                "value": "呼叫報名一王的成員"
+            },
+            {
+                "name": "<!del 1> 或 <!收回 1>",
+                "value": "刪除/收回 1王的報名列表"
+            },
+            {
+                "name": "<!delfor @成員 1> 或 <!代刪 @成員 1>",
+                "value": "幫 @成員 刪除/收回 1王的報名列表"
+            },
+            {
+                "name": "<!清除 1> 或<!clear 1>",
+                "value": "重置指定班表 "
+            },
+            {
+                "name": "<!回復 1> 或<!recover 1>",
+                "value": "回復上次重整前備份名單"
+            },
 
-                        content = [[str]];
-                        result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], '集刀');
-                        if (!doublecall) count -= 1; //如果第一次呼叫 未回報人數要扣掉自己這次回報
-
-                        var msg = '';
-                        if (count > 0) msg += String.format('{0} 已回報(再次呼叫此指令可覆蓋前一次回報訊息)\n還有 {1} 個成員還沒回報', memberName, count);
-                        else msg += String.format('{0} 已回報(再次呼叫此指令可覆蓋前一次回報訊息)\n所有成員都已回報', memberName);
-                        message.reply(msg).then(d_msg => { d_msg.delete(5000) });
-                    }
-                    catch (err) {
-                        console.log(err.message + ' : ' + message.author.username + ':' + message.content)
-                        console.log(err)
-                        message.reply('錯誤訊息: ' + err.message);
-                    }
-                })
-                return;
-
-
-            }
+            
+                                                       ]
+    };
+    message.channel.send({ embed });
+    return;
         }
-
+         
+        }
         /*****大眾功能*****/
 
         if (command === 'help' || command === '說明') {
             var embed = {
-                "title": "書記使用說明書",
+                "title": "使用說明書",
                 "description": "",
                 "color": 1500903,
                 "timestamp": "2019-12-21T02:02:33.417Z",
@@ -1438,22 +908,6 @@ client.on('message', async message => {
                         "value": "查看該頻道公會每人所剩刀數和已輸出的目標"
                     },
                     {
-                        "name": "<!分組> 或 <!分組說明>",
-                        "value": "查看該頻道公會當日分組說明"
-                    },
-                    {
-                        "name": "<!選組 組名> 或 <!報名 組名>",
-                        "value": "為呼叫者登記當日組別 ex: !選組 A"
-                    },
-                    {
-                        "name": "<!選組 @成員 組名> 或 <!報名 @成員 組名>",
-                        "value": "為tag的成員登記當日組別 ex: !選組 @蒼蘭 A"
-                    },
-                    {
-                        "name": "<!查組>",
-                        "value": "查看該頻道公會每組報名人數及名單"
-                    },
-                    {
                         "name": "<!閃退> 或 <!crashlist>",
                         "value": "查看該頻道公會當日閃退人員清單"
                     },
@@ -1469,10 +923,7 @@ client.on('message', async message => {
                         "name": "<!報刀說明>",
                         "value": "取得詳細報刀指令"
                     },
-                    {
-                        "name": "<!集刀說明>",
-                        "value": "取得詳細集刀指令"
-                    },
+                    
                 ]
             };
             message.channel.send({ embed });
@@ -1480,6 +931,7 @@ client.on('message', async message => {
         else if (command === 'reload') {
             try {
                 userlist = {};
+                usercode = {};
                 for (i in ssidlist) {
                     var ul = await gapi.getUserList(ssidlist[i]);
                     for (var j in ul) {
@@ -1500,8 +952,6 @@ client.on('message', async message => {
         else {
             otherreply(message, command, args);
         }
-
-
 
 
     }
@@ -1769,7 +1219,7 @@ function callefttime(baselinehour) {
 }
 
 
-function otherreply(message, command, args) {
+/*function otherreply(message, command, args) {
 
     if (command === 'dance') {
 
@@ -1789,10 +1239,10 @@ function otherreply(message, command, args) {
     }
    else {
         
-        return
+        return;
 
     }
-}
+}  */
 
 function replyimagefrom(message, command, path) {
     var fs = require('fs');
