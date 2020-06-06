@@ -415,9 +415,14 @@ client.on('message', async message => {
                 queue.push(async () => {
              var str = ''; //組合回報訊息(args)
             
-                       list  = objlist[args[0].substring(0,1)]
-                               
-			 if (args.length >= 2) {
+                      
+             
+                       if (args.length < 1) {
+                        message.reply('請輸入要報名的王 ex: !add 5 [訊息]').then(d_msg => { d_msg.delete(5000) });
+                        return;  
+                       } 
+                        list  = objlist[args[0].substring(0,1)]
+			        if (args.length >= 2) {
                         for (var i = 1; i < args.length; i++) {
                             str += args[i] + ' ';
                         }
@@ -431,8 +436,8 @@ client.on('message', async message => {
                           crashed = await getcrash(dtable, memberName);
                         if (ctable[1].indexOf(memberName) != -1) {
                             row = ctable[1].indexOf(memberName);
-                            content = [[ memberName, crashed ? 1 : 0,0]]
-                            result = await gapi.fillin(`B${row + 1}:D${row + 1}`, content, chlist[message.channel.id], list);
+                            content = [[ memberName, crashed ? 1 : 0]]
+                            result = await gapi.fillin(`B${row + 1}:C${row + 1}`, content, chlist[message.channel.id], list);
 			                content = [[str]];
                             result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
                             message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
@@ -454,8 +459,9 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         console.log(err)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
-                    return 0;
+                    return ;
                 })
                 return;
             }
@@ -463,13 +469,18 @@ client.on('message', async message => {
             else if (command === 'addfor'|| command === '代報') {
                 queue.push(async () => {
              var str = ''; //組合回報訊息(args)
+
+                        if (args.length <= 1) {
+                              message.reply('請輸入要報名的王 ex: !addfor @成員 5 [訊息]').then(d_msg => { d_msg.delete(5000) });
+                              return;  
+                           } 
             
                        list  = objlist[args[1].substring(0,1)]
 
                        var memberid = args[0].replace(/[^0-9\.]+/g, '');
                         if (!(memberid in userlist)) {
-                            throw new Error('錯誤的成員名稱!');
-                            return;
+                            message.reply('錯誤的成員名稱!').then(d_msg => { d_msg.delete(5000) });
+                              return;  
                         }
                                
 			 if (args.length >= 3) {
@@ -486,8 +497,8 @@ client.on('message', async message => {
                         ctable = tables[0];
                         if (ctable[1].indexOf(memberName) != -1) {
                             row = ctable[1].indexOf(memberName);
-                            content = [[ memberName, crashed ? 1 : 0,0]]
-                            result = await gapi.fillin(`B${row + 1}:D${row + 1}`, content, chlist[message.channel.id], list);
+                            content = [[ memberName, crashed ? 1 : 0]]
+                            result = await gapi.fillin(`B${row + 1}:C${row + 1}`, content, chlist[message.channel.id], list);
 			                content = [[str]];
                             result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
                             message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
@@ -508,8 +519,9 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         console.log(err)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
-                    return 0;
+                    return ;
                 })
                 return;
             }
@@ -538,8 +550,9 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         console.log(err)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
-                    return 0;
+                    return ;
                 })
                 return;
             }
@@ -588,6 +601,7 @@ client.on('message', async message => {
                         console.log(err)
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
                 })
                 return;
@@ -642,6 +656,7 @@ client.on('message', async message => {
                         console.log(err)
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
                 })
                 return;
@@ -682,6 +697,7 @@ client.on('message', async message => {
                         console.log(err)
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
                 })
                 return;
@@ -711,6 +727,7 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content)
                         console.log(err)
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
                 })
                 return;
@@ -754,6 +771,7 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content);
                         console.log(err);
                         message.reply('錯誤訊息: ' + err.message);
+                       
                     }
                 })
                 return;
@@ -773,15 +791,17 @@ client.on('message', async message => {
                         ctable = tables[0];
                         row = ctable[1].indexOf(memberName) //呼叫者所在row
                         content = [[0]]
+                        content1 = [['']];
                             var msg='在'+list+'的可以出來了，訊息已清空，成功人士記得更新補償秒數or刪表';
                             rowl = ctable[0].length;
-                            for (var i = 2; i < rowl; i++) {
+                            for (var i = 2; i < rowl+1; i++) {
 
                              if (ctable[3][i] === 1 )
                              {
-                                result = await gapi.fillin(String.format('D{0}', i + 1), content, chlist[message.channel.id], list); 
                                 code=usercode[ctable[1][i]][0]; 
                                 msg += String.format('<@!{0}>', code);
+                                result = await gapi.fillin(String.format('D{0}', i + 1), content, chlist[message.channel.id], list); 
+                                result1 = await gapi.fillin(String.format('E{0}', i + 1), content1 , chlist[message.channel.id],list);
                             }
                             }
                             message.channel.send(msg);
@@ -790,6 +810,7 @@ client.on('message', async message => {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content);
                         console.log(err);
                         message.reply('錯誤訊息: ' + err.message);
+                        
                     }
                 })
                 return;
