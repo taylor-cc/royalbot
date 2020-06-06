@@ -17,8 +17,9 @@ const ssidlist = [
 ]
 
 const chlist = {
-    '708899960309153855': ssidlist[0],
-    '700695816645378078': ssidlist[0],
+    
+    '708899960309153855': ssidlist[0], 
+    '700695816645378078': ssidlist[0],  
     '646169028502749204': ssidlist[0],
   
     
@@ -308,12 +309,11 @@ client.on('message', async message => {
  		var remsg = `順序   一王   二王   三王   四王   五王 \n `
                for (i = 2; i < ctable[0].length; i++) {
                     if (ctable[1][i] ===  undefined) ctable[1][i]='NaN'
-		    if (ctable[2][i] ===  undefined) ctable[2][i]='NaN'
+		            if (ctable[2][i] ===  undefined) ctable[2][i]='NaN'
                     if (ctable[3][i] ===  undefined) ctable[3][i]='NaN'
-		    if (ctable[4][i] ===  undefined) ctable[4][i]='NaN'
-		    if (ctable[5][i] ===  undefined) ctable[5][i]='NaN'
+		            if (ctable[4][i] ===  undefined) ctable[4][i]='NaN'
+		            if (ctable[5][i] ===  undefined) ctable[5][i]='NaN'
                     remsg += String.format('  {0}      {1}   {2}   {3}   {4}    {5}', ctable[0][i], ctable[1][i], ctable[2][i], ctable[3][i], ctable[4][i], ctable[5][i])
-                   
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -330,8 +330,8 @@ client.on('message', async message => {
                     remsg += String.format('{0}    {1}', ctable[0][i], ctable[1][i])
                     remsg += ' ' + await getleftknife(dtable, ctable[1][i])
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
+                    if (ctable[2][i] === 1) remsg += ' (閃過)'
+                    if (ctable[3][i] === 1) remsg += ' (已進)'
                     if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
                     remsg += '\n'
                 }
@@ -348,8 +348,8 @@ client.on('message', async message => {
                     remsg += String.format('{0}  {1}', ctable[0][i], ctable[1][i])
                     remsg += ' ' + await getleftknife(dtable, ctable[1][i])
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
+                    if (ctable[2][i] === 1) remsg += ' (閃過)'
+                    if (ctable[3][i] === 1) remsg += ' (已進)'
                     if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
                     remsg += '\n'
                 }
@@ -366,8 +366,8 @@ client.on('message', async message => {
                     remsg += String.format('{0}  {1}', ctable[0][i], ctable[1][i])
                     remsg += ' ' + await getleftknife(dtable, ctable[1][i])
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
+                    if (ctable[2][i] === 1) remsg += ' (閃過)'
+                    if (ctable[3][i] === 1) remsg += ' (已進)'
                     if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
                     remsg += '\n'
                 }
@@ -384,8 +384,8 @@ client.on('message', async message => {
                     remsg += String.format('{0}  {1}', ctable[0][i], ctable[1][i])
                     remsg += ' ' + await getleftknife(dtable, ctable[1][i])
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
+                    if (ctable[2][i] === 1) remsg += ' (閃過)'
+                    if (ctable[3][i] === 1) remsg += ' (已進)'
                     if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
                     remsg += '\n'
                 }
@@ -402,8 +402,8 @@ client.on('message', async message => {
                     remsg += String.format('{0}  {1}', ctable[0][i], ctable[1][i])
                     remsg += ' ' + await getleftknife(dtable, ctable[1][i])
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
-                    if (ctable[2][i] === 'v') remsg += ' (閃過)'
-                    if (ctable[3][i] === 'v') remsg += ' (已進)'
+                    if (ctable[2][i] === 1) remsg += ' (閃過)'
+                    if (ctable[3][i] === 1) remsg += ' (已進)'
                     if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
                     remsg += '\n'
                 }
@@ -422,29 +422,29 @@ client.on('message', async message => {
                             str += args[i] + ' ';
                         }
                     }
- 		     else {
-                        message.reply('請回覆組合/傷害/狀態').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
+ 		    
                     try {
                         var tables = await gapi.getotable(chlist[message.channel.id],list);
                         memberName = userlist[message.author.id][0];
                         ctable = tables[0];
+                        dtable = tables[1];
+                          crashed = await getcrash(dtable, memberName);
                         if (ctable[1].indexOf(memberName) != -1) {
-			                row = ctable[1].indexOf(memberName);
+                            row = ctable[1].indexOf(memberName);
+                            content = [[ memberName, crashed ? 1 : 0,0]]
+                            result = await gapi.fillin(`B${row + 1}:D${row + 1}`, content, chlist[message.channel.id], list);
 			                content = [[str]];
                             result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
                             message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
                             return;
                         }
+                   
                         //取閃退狀態
                         dtable = tables[1];
                         row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
+                        content = [[row, memberName, crashed ? 1 : 0,0]]
                         //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
+                        result = await gapi.fillin(`A${row + 2}:D${row + 2}`, content, chlist[message.channel.id], list);
 			            content = [[str]];
                         result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
                         message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
@@ -477,17 +477,17 @@ client.on('message', async message => {
                             str += args[i] + ' ';
                         }
                     }
- 		     else {
-                        message.reply('請回覆依照格式回覆 ex: !addfor @成員 5 [訊息]').then(d_msg => { d_msg.delete(5000) });
-                        return;
-                    }
-
+                    var tables = await gapi.getotable(chlist[message.channel.id],list);
+                    memberName = userlist[memberid][0];
+                    dtable = tables[1];
+                    crashed = await getcrash(dtable, memberName);
                     try {
-                        var tables = await gapi.getotable(chlist[message.channel.id],list);
-                        memberName = userlist[memberid][0];
+                        
                         ctable = tables[0];
                         if (ctable[1].indexOf(memberName) != -1) {
-			                row = ctable[1].indexOf(memberName);
+                            row = ctable[1].indexOf(memberName);
+                            content = [[ memberName, crashed ? 1 : 0,0]]
+                            result = await gapi.fillin(`B${row + 1}:D${row + 1}`, content, chlist[message.channel.id], list);
 			                content = [[str]];
                             result = await gapi.fillin(String.format('E{0}', row + 1), content, chlist[message.channel.id], list);
                             message.reply('已在班表中,更新回覆訊息').then(d_msg => { d_msg.delete(5000) });
@@ -496,10 +496,9 @@ client.on('message', async message => {
                         //取閃退狀態
                         dtable = tables[1];
                         row = ctable[0].length - 1; //插入位置
-                        crashed = await getcrash(dtable, memberName);
-                        content = [[row, memberName, crashed ? 'v' : '']]
+                        content = [[row, memberName, crashed ? 1 : 0,0]]
                         //TODO: 取剩餘刀數
-                        result = await gapi.fillin(`A${row + 2}:C${row + 2}`, content, chlist[message.channel.id], list);
+                        result = await gapi.fillin(`A${row + 2}:D${row + 2}`, content, chlist[message.channel.id], list);
 			            content = [[str]];
                         result = await gapi.fillin(String.format('E{0}', row + 2), content, chlist[message.channel.id], list);
                         message.reply('報刀成功,你的編號是' + row).then(d_msg => { d_msg.delete(5000) });
@@ -576,7 +575,6 @@ client.on('message', async message => {
                        }
                        else if (row!=rowl){
                         for (i = row+1 ; i < rowl; i++) {
-                            bk = [['','', '','','']]
                             bk = [[ctable[1][i], ctable[2][i], ctable[3][i], ctable[4][i]]] 
                             result = await gapi.fillin(`B${i}:E${i}`, bk , chlist[message.channel.id], list);
                          }
@@ -632,7 +630,6 @@ client.on('message', async message => {
                        }
                        else if (row!=rowl){
                         for (i = row+1 ; i < rowl; i++) {
-                            bk = [['','', '','','']]
                             bk = [[ctable[1][i], ctable[2][i], ctable[3][i], ctable[4][i]]] 
                             result = await gapi.fillin(`B${i}:E${i}`, bk , chlist[message.channel.id], list);
                          }
@@ -640,7 +637,6 @@ client.on('message', async message => {
                          message.reply('已刪除完畢').then(d_msg => { d_msg.delete(5000) });
                         // message.channel.send(`<@&${tag}> ${target}`)
                         }
-                        
                     }
                     catch (err) {
                         console.log(err)
@@ -739,15 +735,15 @@ client.on('message', async message => {
                             return;
                         }
                         var doublecall = false; //檢查是否重複呼叫
-                        if (ctable[3][row] === 'v') {
+                        if (ctable[3][row] === 1) {
                             doublecall = true;
                         }
                         var mancount = ctable[0].length - 2; //因會算到tittle
                         var entercount = 0; //已進場人數
-                        ctable[3].forEach(function (x) { if (x === 'v') entercount += 1 });
+                        ctable[3].forEach(function (x) { if (x === 1) entercount += 1 });
                         if (!doublecall) entercount += 1; //如果未重複呼叫 進場人數要加上自己
                         count = mancount - entercount; //未進人數
-                        content = [['v']]
+                        content = [[1]]
                         result = await gapi.fillin(String.format('D{0}', row + 1), content, chlist[message.channel.id], list);
                         var msg = '';
                         if (count > 0) msg += String.format('{0} 已進場\n還有 {1} 個成員還沒進場', memberName, count);
@@ -764,7 +760,6 @@ client.on('message', async message => {
             }
 
 
-
             else if (command === '退' || command === '退刀'|| command === 'back') {
                 queue.push(async () => {
                     try {
@@ -777,22 +772,19 @@ client.on('message', async message => {
                         memberName = userlist[message.author.id][0];
                         ctable = tables[0];
                         row = ctable[1].indexOf(memberName) //呼叫者所在row
-                        if (row < 0) {
-                            message.reply('不在刀表中。').then(d_msg => { d_msg.delete(5000) });
-                            return;
-                        }
-                        var msg = '';
-                        if (ctable[3][row] != 'v') {
-                            msg += String.format('你不是退過了嗎?還想去哪?')
-                             message.reply(msg).then(d_msg => { d_msg.delete(5000) });
-                             return;
-                        }
-                                                                      
-                        content = [['']]
-                        result = await gapi.fillin(String.format('D{0}', row + 1), content, chlist[message.channel.id], list);
-                        
-                         msg += String.format('敢不敢再打一次?')
-                        message.reply(msg).then(d_msg => { d_msg.delete(5000) });
+                        content = [[0]]
+                            var msg='在'+list+'的可以出來了，訊息已清空，成功人士記得更新補償秒數or刪表';
+                            rowl = ctable[0].length;
+                            for (var i = 2; i < rowl; i++) {
+
+                             if (ctable[3][i] === 1 )
+                             {
+                                result = await gapi.fillin(String.format('D{0}', i + 1), content, chlist[message.channel.id], list); 
+                                code=usercode[ctable[1][i]][0]; 
+                                msg += String.format('<@!{0}>', code);
+                            }
+                            }
+                            message.channel.send(msg);
                     }
                     catch (err) {
                         console.log(err.message + ' : ' + message.author.username + ':' + message.content);
@@ -826,7 +818,7 @@ else if (command === '報刀說明') {
 
             {
                 "name": "<!退 1> 或 <!back 1>",
-                "value": "王死退刀，取消進場狀態 "
+                "value": "王死退刀，取消所有人進場狀態 "
             },
             {
                 "name": "<!all> 或 <!總表>",
