@@ -18,9 +18,10 @@ const ssidlist = [
 
 const chlist = {
     
-    '708899960309153855': ssidlist[0], 
-    '700695816645378078': ssidlist[0],  
-    '646169028502749204': ssidlist[0],
+    '708899960309153855': ssidlist[0],  //test1
+    '700695816645378078': ssidlist[0],  //回報區
+    '646169028502749204': ssidlist[0], //指揮所
+    '729225897902866433': ssidlist[0], //測試區
   
     
     //在這兩個頻道中填表, 都會連結到上面的第一個表單
@@ -109,32 +110,31 @@ client.on('message', async message => {
                     try {
                         memberid = message.author.id;
                         demage = parseInt(args[0]);
+                        sec=0;
                         if (isNaN(demage) || demage > 30000000) {
                             message.reply('傷害數值錯誤或過高!');
                             return;
                         }
                         object = '';
                         ps = '';
-                        if (args.length >= 2) {
-                            for (var i = 1; i < args.length; i++) {
-                                arg = args[i].substring(0, 1);
-                                // console.log(arg)
-                                if (arg === '尾' || arg === '殘') {
-                                    ps = arg;
+                        arg1 = args[1].substring(0, 1);
+
+                                if (arg1 === '1' || arg1 === '2' || arg1=== '3' || arg1 === '4' || arg1 === '5'
+                                    || arg1 === '一' || arg1 === '二' || arg1 === '三' || arg1 === '四' || arg1 === '五') {
+                                    object = arg1;
                                 }
-                                else if (arg === '1' || arg === '2' || arg === '3' || arg === '4' || arg === '5'
-                                    || arg === '一' || arg === '二' || arg === '三' || arg === '四' || arg === '五') {
-                                    object = arg;
+                                if (args.length >= 3) {
+                                arg2 = args[2].substring(0, 1);
+                                if (arg2 === '尾' || arg2 === '殘') ps = arg2;
+                                 if (args.length >= 4 && ps=='尾') sec = parseInt(args[3]);
                                 }
-                                else throw new Error('不正確的fill指令: ' + message.author.username + ':' + message.content)
-                            }
-                        }
-                        await fillandreply(message, memberid, demage, object, ps);
+                              //  else throw new Error('不正確的fill指令: ' + message.author.username + ':' + message.content)
+                        await fillandreply(message, memberid, demage, object, ps,sec);
                     }
                     //例外狀況
                     catch (err) {
                         console.log(err);
-                        message.reply('請以 <!fill 傷害數值 目標(1/1王/一王) (尾/殘)> 的形式呼叫');
+                        message.reply('請以 <!fill 傷害數值 目標(1/1王/一王) (尾/殘) (秒數)> 的形式呼叫');
                     }
                 })
                 return;
@@ -148,27 +148,32 @@ client.on('message', async message => {
                             throw new Error('錯誤的成員名稱!');
                         }
                         demage = parseInt(args[1]);
+                        sec=0;
                         if (isNaN(demage) || demage > 30000000) {
                             message.reply('傷害數值錯誤或過高!');
                             return;
                         }
                         object = '';
                         ps = '';
-                        if (args.length >= 3) {
-                            for (var i = 2; i < args.length; i++) {
-                                arg = args[i].substring(0, 1);
-                                // console.log(arg)
-                                if (arg === '尾' || arg === '殘') {
-                                    ps = arg;
+                        arg2 = args[2].substring(0, 1);
+                         if (arg2 === '1' || arg2 === '2' || arg2 === '3' || arg2 === '4' || arg2 === '5'
+                                    || arg2 === '一' || arg2 === '二' || arg2 === '三' || arg2 === '四' || arg2 === '五') {
+                                    object = arg2;
                                 }
-                                else if (arg === '1' || arg === '2' || arg === '3' || arg === '4' || arg === '5'
-                                    || arg === '一' || arg === '二' || arg === '三' || arg === '四' || arg === '五') {
-                                    object = arg;
+                        if (args.length >= 4) {
+                                arg3 = args[3].substring(0, 1);
+                        if (arg3 === '尾' || arg3 === '殘') { ps = arg3;};
+                        if (args.length >= 5 && ps=='尾') sec = parseInt(args[4]);
                                 }
-                                else throw new Error('不正確的fill指令: ' + message.author.username + ':' + message.content)
-                            }
-                        }
-                        await fillandreply(message, memberid, demage, object, ps);
+                                
+                                
+                               // else throw new Error('不正確的fill指令: ' + message.author.username + ':' + message.content)
+                            
+                    
+                        await fillandreply(message, memberid, demage, object, ps,sec);
+                       
+                            
+                        
                     }
                     //例外狀況
                     catch (err) {
@@ -254,6 +259,54 @@ client.on('message', async message => {
                 }
                 return;
             }
+
+
+            else if (command === '殘刀' || command === '補償' || command === '殘') {
+                try {
+                    var table = await gapi.getDemageTable(chlist[message.channel.id]);
+                    // console.log(table)
+                    var msg = '=====未出補償刀=====\n'
+                   // var count = 0
+                    //var compenstate_count = 0
+                    for (var row = 2; row < 32; row++) {
+                       
+                        if (table[row][18] == 'v') {
+
+                            if ( table[row][5] == true  && table[row][6] ==''){
+                                
+                                msg += String.format('{0}:來自{1} 剩餘時間:{2}s ',  table[row][0],table[row][4], table[row][20])
+                            };
+                            if ( table[row][10] == true  && table[row][11]  ==''){
+                                
+                                msg += String.format('{0}:來自{1} 剩餘時間:{2}s',  table[row][0],table[row][9], table[row][21])
+                            };
+                            if ( table[row][15] == true  && table[row][16]  ==''){
+                                
+                                msg += String.format('{0}:來自{1} 剩餘時間:{2}s',  table[row][0],table[row][14], table[row][22])
+                            };
+                            
+                            msg += '\n'
+                        };
+                       
+                       
+                    }
+                   
+
+                    message.channel.send(msg);
+                }
+                catch (err) {
+                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                    console.log(err)
+                    message.reply('錯誤訊息: ' + err.message);
+                }
+                return;
+            }
+
+
+
+
+
+
             else if (command === 'url' || command === '表單' || command === '表格') {
                 ssid = chlist[message.channel.id]//chlist[message.channel.id]
                 message.channel.send('https://docs.google.com/spreadsheets/d/' + ssid);
@@ -302,6 +355,138 @@ client.on('message', async message => {
                 return;
             }
 	
+            else if (command === '分組' || command === '分組說明' || command === 'gp') {
+                try {
+                    var table = await gapi.getGroup(chlist[message.channel.id]);
+                    var msg = '今日分組說明:\n'
+                    for (var i = 1; i < table.length; i++) {
+                        if (table[i][0] != '') {
+                            if (typeof table[i][4] != "undefined") {
+                                msg += String.format('- {0}   目標 {1}   還有 **{3}**/{4} 個名額   說明: {2}\n', table[i][0], table[i][2], table[i][4], table[i][1] - table[i][3], table[i][1])
+                            }
+                            else {
+                                msg += String.format('- {0}   目標 {1}   還有 **{3}**/{4} 個名額\n', table[i][0], table[i][2], table[i][4], table[i][1] - table[i][3], table[i][1])
+                            }
+                        }
+                        else break;
+                    }
+                    msg += '可使用 <!登記 組別名稱> 或 <!領取 組別名稱> 來領取組別 ex: !領取 ' + table[1][0]
+                    message.channel.send(msg);
+                }
+                catch (err) {
+                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                    console.log(err)
+                    message.reply('錯誤訊息: ' + err.message);
+                }
+                return;
+            }
+
+            else if (command === '領取' || command === '登記') {
+                try {
+                    var newGroup
+                    var memberid
+                    if (args.length == 1) {
+                        newGroup = args[0];
+                        memberid = message.author.id;
+                    }
+                    else if (args.length == 2) {
+                        memberid = args[0].replace(/[^0-9\.]+/g, '');
+                        if (!(memberid in userlist)) {
+                            throw new Error('錯誤的成員名稱!');
+                        }
+                        newGroup = args[1];
+                    }
+                    else {
+                        message.reply('指令輸入錯誤! 請使用 <!登記 組別名稱> 進行報名 ex: !登記 A');
+                        return;
+                    }
+
+                    var table = await gapi.getGroup(chlist[message.channel.id]);
+                    var grouplist = {}
+                    for (var i = 1; i < table.length; i++) {
+                        if (table[i][0] != '') {
+                            grouplist[table[i][0]] = table[i][1] - table[i][3]
+                        }
+                        else break;
+                    }
+
+                    if (!(newGroup in grouplist)) {
+                        message.reply('組別輸入錯誤! 請使用 <!分組> 取得今日分組說明')
+                        return;
+                    }
+                    if (grouplist[newGroup] <= 0) {
+                        message.reply('組別人數已滿! 請使用 <!查組> 取得詳細分組名單')
+                        return;
+                    }
+
+                    var Dtable = await gapi.getDemageTable(chlist[message.channel.id]);
+                    var row = 0;
+                    for (var i = 0; i < Dtable.length; i++) {
+                        if (Dtable[i][0] == userlist[memberid][0]) row = i
+                    }
+                    if (row == 0) {
+                        throw new Error('查無此人')
+                    }
+                    var oriGroup = Dtable[row][19]
+                    result = await gapi.fillin(column[19] + (row + 1), [[newGroup]], chlist[message.channel.id], '');
+
+                    if (oriGroup == '' || typeof oriGroup === 'undefined') message.reply(String.format('{1} 已分到 {0}', newGroup, Dtable[row][0]))
+                    else message.reply(String.format('{2} 已由 {1} 改為 {0}', newGroup, oriGroup, Dtable[row][0]))
+
+                }
+                catch (err) {
+                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                    console.log(err)
+                    message.reply('錯誤訊息: ' + err.message);
+                }
+                return;
+            }
+
+            else if (command === '查組' || command === '分組名單') {
+                try {
+                    var table = await gapi.getGroup(chlist[message.channel.id]);
+                    var grouplist = {}
+                    for (var i = 1; i < table.length; i++) {
+                        if (table[i][0] != '') {
+                            grouplist[table[i][0]] = [String.format('{0}/{1}', table[i][3], table[i][1]), '']
+                        }
+                        else break;
+                    }
+
+                    var Dtable = await gapi.getDemageTable(chlist[message.channel.id]);
+                    var unselected = ''
+                    for (var i = 2; i < Dtable.length - 1; i++) {
+                        if (Dtable[i][19] == '' || typeof Dtable[i][19] === 'undefined') {
+                            unselected += Dtable[i][0] + ', '
+                        }
+                        else {
+                            // console.log(Dtable[i][19])
+                            if (Dtable[i][19] in grouplist)
+                                grouplist[Dtable[i][19]][1] += Dtable[i][0] + ', '
+                            else
+                                unselected += Dtable[i][0] + ', '
+                        }
+                    }
+
+                    msg = '各組別 已報人數/總人數 與 報名人員如下:\n'
+                    for (var i = 1; i < table.length; i++) {
+                        msg += String.format('- {0} ({1}) : {2}\n\n', table[i][0], grouplist[table[i][0]][0], grouplist[table[i][0]][1].substring(0, grouplist[table[i][0]][1].length - 2)) //substring去逗號
+                    }
+                    msg += '未選組 : ' + unselected.substring(0, unselected.length - 2)
+
+                    message.channel.send(msg)
+                }
+                catch (err) {
+                    console.log(err.message + ' : ' + message.author.username + ':' + message.content)
+                    console.log(err)
+                    message.reply('錯誤訊息: ' + err.message);
+                }
+                return;
+            }
+
+
+
+
 
 	    else if (command === 'all' || command === '總表') {
                 var tables = await gapi.getalltable(chlist[message.channel.id]);  
@@ -332,7 +517,7 @@ client.on('message', async message => {
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
                     if (ctable[2][i] === 1) remsg += ' (閃過)'
                     if (ctable[3][i] === 1) remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
+                    if (ctable[4][i]) remsg += '備註' + ctable[4][i]
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -350,7 +535,7 @@ client.on('message', async message => {
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
                     if (ctable[2][i] === 1) remsg += ' (閃過)'
                     if (ctable[3][i] === 1) remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
+                    if (ctable[4][i]) remsg += '備註' + ctable[4][i]
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -368,7 +553,7 @@ client.on('message', async message => {
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
                     if (ctable[2][i] === 1) remsg += ' (閃過)'
                     if (ctable[3][i] === 1) remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
+                    if (ctable[4][i]) remsg += '備註' + ctable[4][i]
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -386,7 +571,7 @@ client.on('message', async message => {
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
                     if (ctable[2][i] === 1) remsg += ' (閃過)'
                     if (ctable[3][i] === 1) remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
+                    if (ctable[4][i]) remsg += '備註' + ctable[4][i]
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -404,7 +589,7 @@ client.on('message', async message => {
                     remsg += getgroup(dtable, ctable[1][i]) != "" ? ' ' + getgroup(dtable, ctable[1][i]) : ''
                     if (ctable[2][i] === 1) remsg += ' (閃過)'
                     if (ctable[3][i] === 1) remsg += ' (已進)'
-                    if (ctable[4][i]) remsg += ' 備註: ' + ctable[4][i]
+                    if (ctable[4][i]) remsg += '備註' + ctable[4][i]
                     remsg += '\n'
                 }
                 message.channel.send(remsg);
@@ -413,7 +598,7 @@ client.on('message', async message => {
             
             else if (command === 'add'|| command === '報') {
                 queue.push(async () => {
-             var str = ''; //組合回報訊息(args)
+             var str = ':'; //組合回報訊息(args)
             
                       
              
@@ -468,7 +653,7 @@ client.on('message', async message => {
 
             else if (command === 'addfor'|| command === '代報') {
                 queue.push(async () => {
-             var str = ''; //組合回報訊息(args)
+             var str = ':'; //組合回報訊息(args)
 
                         if (args.length <= 1) {
                               message.reply('請輸入要報名的王 ex: !addfor @成員 5 [訊息]').then(d_msg => { d_msg.delete(5000) });
@@ -792,7 +977,7 @@ client.on('message', async message => {
                         row = ctable[1].indexOf(memberName) //呼叫者所在row
                         content = [[0]]
                         content1 = [['']];
-                            var msg='在'+list+'的可以出來了，訊息已清空，成功人士記得更新補償秒數or刪表';
+                            var msg='在'+list+'的可以出來了，訊息已清空，成功人士記得刪表(del)跟登記傷害(fill)';
                             rowl = ctable[0].length;
                             for (var i = 2; i < rowl+1; i++) {
 
@@ -839,7 +1024,7 @@ else if (command === '報刀說明') {
 
             {
                 "name": "<!退 1> 或 <!back 1>",
-                "value": "王死退刀，取消所有人進場狀態 "
+                "value": "王死退刀，取消所有人進場狀態，收尾者使用，請務必確認該王已倒 "
             },
             {
                 "name": "<!all> 或 <!總表>",
@@ -870,7 +1055,7 @@ else if (command === '報刀說明') {
                 "name": "<!回復 1> 或<!recover 1>",
                 "value": "回復上次重整前備份名單"
             },
-
+            
             
                                                        ]
     };
@@ -897,20 +1082,40 @@ else if (command === '報刀說明') {
                 },
                 "fields": [
                     {
-                        "name": "<!fill 傷害 目標> 或 <!填表 傷害 目標>",
+                        "name": "<!fill 傷害 目標> ",
                         "value": "為呼叫者填傷害，目標用12345或一二三四五都可以。ex: !fill 2000000 3"
                     },
                     {
-                        "name": "<!fill 傷害 目標 尾刀/殘刀> 或 <!填表 傷害 目標 尾刀/殘刀>",
-                        "value": "若是尾刀或補償刀(殘刀)，只要在最後加註尾或殘即可。ex: !fill 2000000 五 殘；在尾刀有勾的情況下，下次填表都會自動當成殘刀"
+                        "name": "<!fill 傷害 目標 殘刀> ",
+                        "value": "補償刀(殘刀)，只要在最後加註尾或殘即可。ex: !fill 2000000 5 殘"
                     },
                     {
-                        "name": "<!fillfor @成員 傷害 目標 (尾/殘)> 或 <!代填 @成員 傷害 目標 (尾/殘)>",
-                        "value": "可幫tag的團員填傷害 ex: !fillfor @蒼蘭 7777777"
+                        "name": "<!fill 傷害 目標 尾 秒數> ",
+                        "value": "收5王，並註記補償秒數56s。ex: !fill 2000000 5 尾 56"
+                    },
+                    {
+                        "name": "<!fillfor @成員 傷害 目標 (尾/殘) 秒數> ",
+                        "value": "可幫tag的團員填傷害 規則同!fill"
                     },
                     {
                         "name": "<!status> 或 <!status @成員>",
                         "value": "查看呼叫者或某成員當日傷害紀錄"
+                    },
+                    {
+                        "name": "<!分組> 或 <!分組說明>",
+                        "value": "查看該頻道公會當日分組說明"
+                    },
+                    {
+                        "name": "<!登記 組名> 或 <!領取 組名>",
+                        "value": "為呼叫者登記當日組別 ex: !選組 A"
+                    },
+                    {
+                        "name": "<!選組 @成員 組名> 或 <!領取 @成員 組名>",
+                        "value": "為tag的成員登記當日組別 ex: !選組 @蒼蘭 A"
+                    },
+                    {
+                        "name": "<!查組>",
+                        "value": "查看該頻道公會每組報名人數及名單"
                     },
                     {
                         "name": "<!remind>",
@@ -919,6 +1124,10 @@ else if (command === '報刀說明') {
                     {
                         "name": "<!查刀>",
                         "value": "查看該頻道公會每人所剩刀數和已輸出的目標"
+                    },
+                    {
+                        "name": "<!殘刀> 或<!補償> 或<!殘> ",
+                        "value": "確認目前所有補償刀狀況"
                     },
                     {
                         "name": "<!閃退> 或 <!crashlist>",
@@ -1004,7 +1213,7 @@ async function statusandreply(message, memberid) {
 }
 
 
-async function fillandreply(message, memberid, demage, object, ps) {
+async function fillandreply(message, memberid, demage, object, ps,sec) {
     try {
         if (object == '') {
             message.reply('請填寫輸出目標。ex: !fill 1234567 1');
@@ -1014,7 +1223,7 @@ async function fillandreply(message, memberid, demage, object, ps) {
         var table = await gapi.getDemageTable(chlist[message.channel.id]);
         var former_status = await getstatus(table, memberName);
 
-        await fillindemage(message, table, memberid, demage, object, ps);
+        await fillindemage(message, table, memberid, demage, object, ps,sec);
 
         var table2 = await gapi.getDemageTable(chlist[message.channel.id]);
         var latter_status = await getstatus(table2, memberName);
@@ -1047,7 +1256,7 @@ async function fillandreply(message, memberid, demage, object, ps) {
     }
 }
 
-async function fillindemage(message, table, memberid, demage, object, ps) {
+async function fillindemage(message, table, memberid, demage, object, ps,sec) {
     return new Promise(async function (resolve, reject) {
         try {
             memberName = userlist[memberid][0];
@@ -1057,7 +1266,7 @@ async function fillindemage(message, table, memberid, demage, object, ps) {
             }
 
             //先找有勾尾且還沒有殘刀傷害的
-            for (var j = 5; j < table[1].length; j += 5) {
+            for (var j = 5; j < table[1].length-5; j += 5) {
                 if (table[row][j] == true) {
                     if (table[row][j + 1] == '' || typeof table[row][j + 1] === 'undefined') { //尾刀打勾且殘刀傷害空白
                         result = await gapi.fillin(column[j + 1] + (row + 1), [[demage]], chlist[message.channel.id], '');
@@ -1073,9 +1282,9 @@ async function fillindemage(message, table, memberid, demage, object, ps) {
             // console.log(table)
             //再來找沒勾尾 但有ps殘的 -> 找殘刀傷害空白 且下一隊傷害空白
             if (ps === '殘') {
-                for (var j = 6; j < table[1].length; j += 5) {
+                for (var j = 6; j < table[1].length-5; j += 5) {
                     if (table[row][j] == '' || isNaN(table[row][j])) { //殘刀傷害空白
-                        if (j + 2 >= table[row].length) {
+                        if (j + 7 >= table[row].length) {
                             result = await gapi.fillin(column[j] + (row + 1), [[demage]], chlist[message.channel.id], '');
                             if (object != '') {
                                 result = await gapi.fillin(column[j + 1] + (row + 1), [[objlist[object]]], chlist[message.channel.id], '');
@@ -1100,15 +1309,30 @@ async function fillindemage(message, table, memberid, demage, object, ps) {
 
             }
             else {
-                for (var j = 3; j < table[1].length; j += 5) {
+                for (var j = 3; j < table[1].length-5; j += 5) {
                     if (table[row][j] == '') { //如果傷害空白
                         result = await gapi.fillin(column[j] + (row + 1), [[demage]], chlist[message.channel.id], '');
-                        if (ps === '尾') {
-                            result = await gapi.fillin(column[j + 2] + (row + 1), [[true]], chlist[message.channel.id], '');
-                        }
+                        
                         if (object != '') {
                             result = await gapi.fillin(column[j + 1] + (row + 1), [[objlist[object]]], chlist[message.channel.id], '');
                         }
+
+                        if (ps === '尾') {
+                            result = await gapi.fillin(column[j + 2] + (row + 1), [[true]], chlist[message.channel.id], '');
+                            var table2 = await gapi.getDemageTable(chlist[message.channel.id]);
+                            if(table2[row][5] == true && table2[row][6] == ''){result = await gapi.fillin(column[20] + (row + 1), [[sec]], chlist[message.channel.id], '');
+                            
+                        };
+                            if(table2[row][10] == true && table2[row][11] == ''){result = await gapi.fillin(column[21] + (row + 1), [[sec]], chlist[message.channel.id], '');
+                            
+                        };
+                            if(table2[row][15] == true && table2[row][16] == ''){result = await gapi.fillin(column[22] + (row + 1), [[sec]], chlist[message.channel.id], '');
+                            
+                        };
+                        }
+
+                        
+                       
                         resolve(result);
                         return;
                     }
