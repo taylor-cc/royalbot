@@ -261,7 +261,7 @@ client.on('message', async message => {
             }
 
 
-            else if (command === '殘刀' || command === '補償' || command === '殘') {
+            else if (command === '殘刀' || command === '補償表' || command === '殘') {
                 try {
                     var table = await gapi.getDemageTable(chlist[message.channel.id]);
                     // console.log(table)
@@ -976,7 +976,7 @@ client.on('message', async message => {
                         ctable = tables[0];
                         row = ctable[1].indexOf(memberName) //呼叫者所在row
                         content = [[0]]
-                        content1 = [['']];
+                        content1 = [[':']];
                             var msg='在'+list+'的可以出來了，訊息已清空，成功人士記得刪表(del)跟登記傷害(fill)';
                             rowl = ctable[0].length;
                             for (var i = 2; i < rowl+1; i++) {
@@ -1456,7 +1456,7 @@ function callefttime(baselinehour) {
 }
 
 
-/*function otherreply(message, command, args) {
+function otherreply(message, command, args) {
 
     if (command === 'dance') {
 
@@ -1470,16 +1470,33 @@ function callefttime(baselinehour) {
 
     }
 
-    else if(command === '黎明卿'|| command === '爆死'|| command === '救'|| command === '我愛黎明'){
+   /* else if(command === '黎明卿'|| command === '爆死'|| command === '救'|| command === '我愛黎明'){
         message.reply('素晴らしい' );
         return
+    }*/
+
+    else if(command === '補償計算'|| command === '補償'||command === '殘秒'){
+        var sec=0;
+        A = parseInt(args[0]);
+        B =  parseInt(args[1]);
+        var sec=110-A/B*(90);
+        message.channel.send('取得補償秒數:'+sec+'s' );
+        return
     }
+    else if(command === '合刀試算'|| command === '合刀'|| command === '尾傷'){
+        var sec=0;
+        A = parseInt(args[0]);
+        var da=(90*A)/20;
+        message.channel.send('尾刀所需傷害:'+da+'w' );
+        return
+    }
+
    else {
         
         return;
 
     }
-}  */
+}  
 
 function replyimagefrom(message, command, path) {
     var fs = require('fs');

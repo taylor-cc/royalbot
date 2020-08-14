@@ -79,7 +79,7 @@ module.exports = {
                 try {
                     var oauth = await getauth(JSON.parse(content));
                     var sheetname = getSheetName()
-                    var data = await toget(oauth, SSID, sheetname + '!A1:T33', 'ROWS');
+                    var data = await toget(oauth, SSID, sheetname + '!A1:W33', 'ROWS');
                     resolve(data);
                 }
                 catch (err) {
@@ -231,7 +231,7 @@ module.exports = {
                 try {
                     var oauth = await getauth(JSON.parse(content));
                     var sheetname = getSheetName()
-                    var data = await toget(oauth, SSID, sheetname + '!C41:G50', 'ROWS');
+                    var data = await toget(oauth, SSID, sheetname + '!C41:G51', 'ROWS');
                     resolve(data);
                 }
                 catch (err) {
